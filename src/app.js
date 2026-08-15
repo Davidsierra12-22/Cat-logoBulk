@@ -1,4 +1,6 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const { pingRedis } = require('./config/redis');
 const { getMongoStatus } = require('./config/db');
 const errorHandler = require('./middlewares/errorHandler');
@@ -14,6 +16,18 @@ app.get('/health', async (req, res) => {
   }
   return res.status(503).json({ status: 'error', mongo, redis });
 });
+
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+const authRoutes = require('./modules/auth/auth.routes');
+const productoRoutes = require('./modules/productos/producto.routes');
+const proveedorRoutes = require('./modules/proveedores/proveedor.routes');
+const categoriaRoutes = require('./modules/categorias/categoria.routes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/productos', productoRoutes);
+app.use('/api/proveedores', proveedorRoutes);
+app.use('/api/categorias', categoriaRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
