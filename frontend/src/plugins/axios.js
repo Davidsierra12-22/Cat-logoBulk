@@ -36,7 +36,7 @@ api.interceptors.request.use((config) => {
   const auth = useAuthStore();
 
   if (auth.token) {
-    config.headers["x-token"] = auth.token;
+    config.headers["Authorization"] = `Bearer ${auth.token}`;
   }
 
   return config;
@@ -58,7 +58,7 @@ api.interceptors.response.use(
 
     const errorNormalizado = {
       status: error.response?.status ?? 0,
-      mensaje: data?.msg || mensajeSegunFallo(error),
+      mensaje: data?.mensaje || data?.msg || mensajeSegunFallo(error),
       errores: Array.isArray(data?.errors) ? data.errors : [],
     };
 

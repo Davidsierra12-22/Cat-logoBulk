@@ -33,7 +33,7 @@ function errorHandler(err, req, res, next) {
     console.error('[errorHandler]', err);
   }
 
-  res.status(statusCode).json({ statusCode, mensaje, msg: mensaje, codigo, errors: [] });
+  res.status(statusCode).json({ statusCode, mensaje, codigo });
 }
 
 module.exports = errorHandler;

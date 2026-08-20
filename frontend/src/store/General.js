@@ -38,8 +38,8 @@ export const useGeneralStore = defineStore("general", () => {
   // --- getters: datos calculados --------------------------------------------
 
   /**
-   * URL de la API que se esta usando. Util para depurar en clase: si el
-   * aprendiz apunta al puerto equivocado, lo ve en el pie del menu.
+   * URL de la API que se esta usando. Util para depurar: si el
+   * frontend apunta al puerto equivocado, lo ve en el pie del menu.
    */
   const urlApi = computed(() => import.meta.env.VITE_API_URL);
 

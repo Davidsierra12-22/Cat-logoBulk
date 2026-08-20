@@ -28,10 +28,10 @@
   // hay UNA sola fuente de verdad y cambiar $primary retiñe todo de una.
   //
   // El segundo valor de var() es el respaldo, por si --q-primary no existiera.
-  --color_button: var(--q-primary, #2e7d32);
-  --color_box: var(--q-primary, #2e7d32);
-  --color_header: var(--q-primary, #2e7d32);
-  --color_input: var(--q-primary, #2e7d32);
+  --color_button: var(--q-primary, #1565C0);
+  --color_box: var(--q-primary, #1565C0);
+  --color_header: var(--q-primary, #1565C0);
+  --color_input: var(--q-primary, #1565C0);
 
   // Este si es un verde propio, distinto del de marca: el de las cabeceras
   // de card.

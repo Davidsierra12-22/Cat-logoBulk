@@ -6,40 +6,36 @@ const Usuario = require('./usuario.model');
 
 const SALT_ROUNDS = 10;
 
-async function registrar({ nombre, email, password, rol }) {
+async function registrar({ email, password, rol }) {
   const yaExiste = await Usuario.findOne({ email: email.toLowerCase() });
   if (yaExiste) {
     throw new AppError(409, 'El email ya está registrado', 'EMAIL_YA_REGISTRADO');
   }
 
   const hash = await bcrypt.hash(password, SALT_ROUNDS);
-  await Usuario.create({ nombre, email, password: hash, rol });
+  const usuario = await Usuario.create({ email, password: hash, rol });
 
-  return { msg: 'Usuario registrado correctamente' };
+  return { id: usuario._id, email: usuario.email, rol: usuario.rol };
 }
 
 async function loguear({ email, password }) {
   const usuario = await Usuario.findOne({ email: email.toLowerCase() }).select('+password');
   if (!usuario) {
-    throw new AppError(400, 'Usuario o contraseña incorrectos', 'CREDENCIALES_INVALIDAS');
-  }
-
-  if (usuario.status !== 0) {
-    throw new AppError(400, 'El usuario esta inactivo', 'USUARIO_INACTIVO');
+    throw new AppError(401, 'Credenciales inválidas', 'CREDENCIALES_INVALIDAS');
   }
 
   const passwordValida = await bcrypt.compare(password, usuario.password);
   if (!passwordValida) {
-    throw new AppError(400, 'Usuario o contraseña incorrectos', 'CREDENCIALES_INVALIDAS');
+    throw new AppError(401, 'Credenciales inválidas', 'CREDENCIALES_INVALIDAS');
   }
 
   const token = jwt.sign(
-    { uid: usuario._id.toString(), rol: usuario.rol },
+    { sub: usuario._id.toString(), rol: usuario.rol },
     env.JWT_SECRET,
     { expiresIn: env.JWT_EXPIRES_IN }
   );
 
-  return { usuario: usuario.toJSON(), token };
+  return { token };
 }
 
 module.exports = { registrar, loguear };
