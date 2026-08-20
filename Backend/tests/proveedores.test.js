@@ -8,7 +8,7 @@ beforeEach(limpiarBD);
 
 async function tokenDe(rol) {
   const email = `${rol}${Date.now()}@test.com`;
-  await request(app).post('/api/auth/register').send({ email, password: 'secreta123', rol });
+  await request(app).post('/api/auth/register').send({ nombre: 'Test User', email, password: 'secreta123', rol });
   const res = await request(app).post('/api/auth/login').send({ email, password: 'secreta123' });
   return res.body.token;
 }
