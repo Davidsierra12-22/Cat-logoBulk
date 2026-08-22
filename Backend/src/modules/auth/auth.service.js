@@ -13,7 +13,7 @@ async function registrar({ email, password, rol }) {
   }
 
   const hash = await bcrypt.hash(password, SALT_ROUNDS);
-  const usuario = await Usuario.create({ email, password: hash, rol });
+  const usuario = await Usuario.create({ email, password: hash, rol: rol || 'user' });
 
   return { id: usuario._id, email: usuario.email, rol: usuario.rol };
 }
@@ -30,7 +30,7 @@ async function loguear({ email, password }) {
   }
 
   const token = jwt.sign(
-    { sub: usuario._id.toString(), rol: usuario.rol },
+    { sub: usuario._id.toString(), rol: usuario.rol.toLowerCase() },
     env.JWT_SECRET,
     { expiresIn: env.JWT_EXPIRES_IN }
   );

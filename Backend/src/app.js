@@ -31,11 +31,32 @@ const authRoutes = require('./modules/auth/auth.routes');
 const productoRoutes = require('./modules/productos/producto.routes');
 const proveedorRoutes = require('./modules/proveedores/proveedor.routes');
 const categoriaRoutes = require('./modules/categorias/categoria.routes');
+const usuarioRoutes = require('./modules/usuarios/usuario.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/proveedores', proveedorRoutes);
 app.use('/api/categorias', categoriaRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+
+const Producto = require('./modules/productos/producto.model');
+
+app.get('/api/catalogo', async (req, res, next) => {
+  try {
+    const { page = 1, limit = 20, categoria } = req.query;
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
+    const filtro = { disponible: true };
+    if (categoria) filtro.categoria = String(categoria).toLowerCase();
+    const [total, data] = await Promise.all([
+      Producto.countDocuments(filtro),
+      Producto.find(filtro).sort({ createdAt: -1 }).skip((pageNum - 1) * limitNum).limit(limitNum),
+    ]);
+    return res.status(200).json({ data, page: pageNum, limit: limitNum, total });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 app.use((req, res) => {
   res.status(404).json({

@@ -5,40 +5,62 @@ import { useAuthStore } from "@/store/Auth";
 
 import AdminLayout from "@/layouts/AdminLayout.vue";
 
+import CatalogoView from "@/views/CatalogoView.vue";
 import LoginView from "@/views/LoginView.vue";
+import DashboardView from "@/views/DashboardView.vue";
 import ProductosView from "@/views/ProductosView.vue";
 import ProveedoresView from "@/views/ProveedoresView.vue";
 import CategoriasView from "@/views/CategoriasView.vue";
+import UsuariosView from "@/views/UsuariosView.vue";
 import NotFoundView from "@/views/NotFoundView.vue";
 
 const routes = [
   {
     path: "/",
+    name: "catalogo",
+    component: CatalogoView,
+    meta: { titulo: "Catalogo" },
+  },
+  {
+    path: "/login",
     name: "login",
     component: LoginView,
     meta: { titulo: "Iniciar sesion", soloInvitados: true },
   },
   {
-    path: "/",
+    path: "/admin",
     component: AdminLayout,
+    meta: { requiereAuth: true },
     children: [
+      {
+        path: "",
+        name: "admin",
+        component: DashboardView,
+        meta: { titulo: "Admin" },
+      },
       {
         path: "productos",
         name: "productos",
         component: ProductosView,
-        meta: { titulo: "Productos", requiereAuth: true },
+        meta: { titulo: "Productos" },
       },
       {
         path: "proveedores",
         name: "proveedores",
         component: ProveedoresView,
-        meta: { titulo: "Proveedores", requiereAuth: true },
+        meta: { titulo: "Proveedores" },
       },
       {
         path: "categorias",
         name: "categorias",
         component: CategoriasView,
-        meta: { titulo: "Categorias", requiereAuth: true },
+        meta: { titulo: "Categorias" },
+      },
+      {
+        path: "usuarios",
+        name: "usuarios",
+        component: UsuariosView,
+        meta: { titulo: "Usuarios" },
       },
       {
         path: ":pathMatch(.*)*",
@@ -70,7 +92,7 @@ function protegerRutas(to) {
   }
 
   if (to.meta.soloInvitados === true && auth.estaAutenticado) {
-    return { name: "productos" };
+    return { name: "admin" };
   }
 
   return true;

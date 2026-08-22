@@ -10,9 +10,11 @@ const auth = useAuthStore();
 const general = useGeneralStore();
 
 const menuItems = [
+  { label: "Panel", icon: "dashboard", route: "admin" },
   { label: "Productos", icon: "inventory_2", route: "productos" },
   { label: "Proveedores", icon: "local_shipping", route: "proveedores" },
   { label: "Categorias", icon: "category", route: "categorias" },
+  { label: "Usuarios", icon: "people", route: "usuarios" },
 ];
 
 const rutaActual = computed(() => router.currentRoute.value.name);
@@ -33,6 +35,9 @@ const cerrarSesion = () => {
           {{ general.titulo }}
         </q-toolbar-title>
         <div class="text-caption q-mr-md">Admin</div>
+        <q-btn flat dense no-caps icon="storefront" to="catalogo">
+          <q-tooltip>Catalogo publico</q-tooltip>
+        </q-btn>
         <q-btn flat dense round icon="logout" @click="cerrarSesion">
           <q-tooltip>Cerrar sesion</q-tooltip>
         </q-btn>

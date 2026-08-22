@@ -29,7 +29,7 @@ const iniciarSesion = async () => {
 
     auth.guardarSesion(respuesta);
     notificarOk(`Bienvenido`);
-    router.push({ name: "productos" });
+    router.push({ name: "admin" });
   } catch (e) {
     notificarError(e);
   } finally {

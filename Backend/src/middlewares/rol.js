@@ -5,7 +5,7 @@ function rol(rolRequerido) {
     if (!req.usuario) {
       return next(new AppError(401, 'Debes autenticarte primero', 'NO_AUTENTICADO'));
     }
-    if (req.usuario.rol !== rolRequerido) {
+    if (req.usuario.rol.toLowerCase() !== rolRequerido.toLowerCase()) {
       return next(
         new AppError(403, 'No tienes permisos para esta acción', 'ROL_NO_PERMITIDO')
       );
