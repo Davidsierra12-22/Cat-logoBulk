@@ -43,7 +43,6 @@ const irLogin = () => {
   <q-layout view="lHh Lpr lFf">
     <q-header elevated class="bg-white text-dark">
       <q-toolbar>
-        <q-btn flat dense round icon="menu" />
         <q-toolbar-title class="text-weight-bold row items-center">
           <img :src="logo" width="32" height="32" class="q-mr-sm" />
           {{ general.titulo }}
