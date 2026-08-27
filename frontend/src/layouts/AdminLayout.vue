@@ -36,7 +36,7 @@ const cerrarSesion = () => {
           {{ general.titulo }}
         </q-toolbar-title>
         <div class="text-caption q-mr-md">Admin</div>
-        <q-btn flat dense no-caps icon="storefront" to="catalogo">
+        <q-btn flat dense no-caps icon="storefront" :to="{ name: 'catalogo' }">
           <q-tooltip>Catalogo publico</q-tooltip>
         </q-btn>
         <q-btn flat dense round icon="logout" @click="cerrarSesion">
