@@ -42,6 +42,14 @@ const opciones = [
     color: "purple",
     bgColor: "purple-1",
   },
+  {
+    titulo: "Importaciones",
+    subtitulo: "Importar catalogo desde Excel",
+    icono: "upload_file",
+    ruta: "imports",
+    color: "teal",
+    bgColor: "teal-1",
+  },
 ];
 
 const cerrarSesion = () => {

@@ -15,6 +15,7 @@ const menuItems = [
   { label: "Proveedores", icon: "local_shipping", route: "proveedores" },
   { label: "Categorias", icon: "category", route: "categorias" },
   { label: "Usuarios", icon: "people", route: "usuarios" },
+  { label: "Importaciones", icon: "upload_file", route: "imports" },
 ];
 
 const rutaActual = computed(() => router.currentRoute.value.name);

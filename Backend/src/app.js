@@ -32,12 +32,14 @@ const productoRoutes = require('./modules/productos/producto.routes');
 const proveedorRoutes = require('./modules/proveedores/proveedor.routes');
 const categoriaRoutes = require('./modules/categorias/categoria.routes');
 const usuarioRoutes = require('./modules/usuarios/usuario.routes');
+const importRoutes = require('./modules/imports/import.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/proveedores', proveedorRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/imports', importRoutes);
 
 const Producto = require('./modules/productos/producto.model');
 

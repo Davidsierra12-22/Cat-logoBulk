@@ -73,14 +73,11 @@ const importJobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-function limiteErrores(next) {
+importJobSchema.pre('save', function limiteErrores() {
   if (this.errores && this.errores.length > env.IMPORT_ERRORS_CAP) {
     this.errores = this.errores.slice(-env.IMPORT_ERRORS_CAP);
   }
-  next();
-}
-
-importJobSchema.pre('save', limiteErrores);
+});
 
 importJobSchema.set('toJSON', {
   transform: (doc, ret) => {

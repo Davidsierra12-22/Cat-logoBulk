@@ -12,6 +12,7 @@ import ProductosView from "@/views/ProductosView.vue";
 import ProveedoresView from "@/views/ProveedoresView.vue";
 import CategoriasView from "@/views/CategoriasView.vue";
 import UsuariosView from "@/views/UsuariosView.vue";
+import ImportView from "@/views/ImportView.vue";
 import NotFoundView from "@/views/NotFoundView.vue";
 
 const routes = [
@@ -61,6 +62,12 @@ const routes = [
         name: "usuarios",
         component: UsuariosView,
         meta: { titulo: "Usuarios" },
+      },
+      {
+        path: "imports",
+        name: "imports",
+        component: ImportView,
+        meta: { titulo: "Importaciones" },
       },
       {
         path: ":pathMatch(.*)*",
