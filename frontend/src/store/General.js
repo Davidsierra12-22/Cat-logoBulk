@@ -30,7 +30,7 @@ export const useGeneralStore = defineStore("general", () => {
   const titulo = ref(import.meta.env.VITE_APP_TITULO || "Estructura Frontend");
 
   // Si el menu lateral esta abierto (lo controla el boton de hamburguesa).
-  const menuAbierto = ref(false);
+  const menuAbierto = ref(true);
 
   // Ultima vez que una pantalla termino de traer datos del backend.
   const ultimaSincronizacion = ref(null);

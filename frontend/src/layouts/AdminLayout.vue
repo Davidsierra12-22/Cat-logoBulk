@@ -45,7 +45,7 @@ const cerrarSesion = () => {
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="general.menuAbierto" show-if-above bordered :width="220">
+    <q-drawer v-model="general.menuAbierto" bordered :width="220">
       <q-list class="q-pa-md">
         <q-item-label header class="text-grey-7 text-weight-bold text-uppercase text-caption">
           Menu
