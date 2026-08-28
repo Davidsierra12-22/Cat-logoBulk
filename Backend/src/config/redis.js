@@ -4,12 +4,21 @@ const env = require('./env');
 const redis = new Redis({
   host: env.REDIS_HOST,
   port: env.REDIS_PORT,
-  maxRetriesPerRequest: null,
+  maxRetriesPerRequest: 3,
+  retryStrategy(times) {
+    if (times > 3) return null;
+    return Math.min(times * 200, 2000);
+  },
+  lazyConnect: true,
 });
 
 redis.on('error', (err) => {
-  console.error(`[redis] Error de conexión: ${err.message}`);
+  if (err.code !== 'ECONNREFUSED') {
+    console.error(`[redis] Error de conexión: ${err.message}`);
+  }
 });
+
+redis.connect().catch(() => {});
 
 async function pingRedis() {
   try {

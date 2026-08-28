@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 import EncabezadoPagina from "@/components/Encabezados/EncabezadoPagina.vue";
 import TablaDatos from "@/components/Tables/TablaDatos.vue";
@@ -30,6 +30,23 @@ const totalPaginas = ref(1);
 const totalItems = ref(0);
 const limite = 20;
 
+let pollTimer = null;
+
+const iniciarPolling = () => {
+  detenerPolling();
+  pollTimer = setInterval(async () => {
+    const activos = jobs.value.filter((j) => j.estado === "pending" || j.estado === "processing");
+    if (activos.length === 0) return;
+    try {
+      await cargar();
+    } catch (_) {}
+  }, 2000);
+};
+
+const detenerPolling = () => {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+};
+
 const cargar = async () => {
   cargando.value = true;
   error.value = null;
@@ -39,6 +56,9 @@ const cargar = async () => {
     totalPaginas.value = Math.ceil(respuesta.total / limite) || 1;
     totalItems.value = respuesta.total;
     general.marcarSincronizacion();
+
+    const activos = jobs.value.filter((j) => j.estado === "pending" || j.estado === "processing");
+    if (activos.length > 0) { iniciarPolling(); } else { detenerPolling(); }
   } catch (e) {
     error.value = e.mensaje;
     notificarError(e);
@@ -48,6 +68,7 @@ const cargar = async () => {
 };
 
 onMounted(cargar);
+onUnmounted(detenerPolling);
 
 const dialogo = ref(false);
 const subiendo = ref(false);
@@ -159,6 +180,13 @@ const estadoLabel = (estado) => {
         <template #body-cell-estado="celda">
           <q-td :props="celda" class="text-center">
             <q-badge :color="estadoColor(celda.row.estado)" :label="estadoLabel(celda.row.estado)" />
+            <div v-if="celda.row.estado === 'processing' && celda.row.total > 0" class="q-mt-xs">
+              <q-linear-progress
+                :value="celda.row.procesados / celda.row.total"
+                color="primary" size="4px" rounded
+              />
+              <div class="text-caption text-grey-7">{{ celda.row.procesados }}/{{ celda.row.total }}</div>
+            </div>
           </q-td>
         </template>
 
@@ -258,6 +286,10 @@ const estadoLabel = (estado) => {
         </q-card-section>
 
         <q-card-section v-else-if="detalle">
+          <div v-if="detalle.estado === 'processing' && detalle.total > 0" class="q-mb-md">
+            <div class="text-caption text-grey-7 q-mb-xs">Procesando {{ detalle.procesados }} de {{ detalle.total }}...</div>
+            <q-linear-progress :value="detalle.procesados / detalle.total" color="primary" size="8px" rounded />
+          </div>
           <div class="q-gutter-sm">
             <div class="row">
               <div class="col-6 text-grey-7">Archivo:</div>
