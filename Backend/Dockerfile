@@ -7,6 +7,9 @@ RUN npm install --omit=dev
 
 COPY . .
 
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
+
 EXPOSE 3000
 
-CMD ["node", "src/server.js"]
+ENTRYPOINT ["sh", "./entrypoint.sh"]
