@@ -18,6 +18,17 @@ router.get('/', auth, categoriaController.listar);
 
 /**
  * @swagger
+ * /categorias/public:
+ *   get:
+ *     tags: [Categorias]
+ *     summary: Listar categorías (público) para filtros del catálogo
+ *     responses:
+ *       200: { description: Lista de categorías con su metadata }
+ */
+router.get('/public', categoriaController.listar);
+
+/**
+ * @swagger
  * /categorias/{slug}:
  *   get:
  *     tags: [Categorias]

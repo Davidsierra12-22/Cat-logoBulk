@@ -48,11 +48,20 @@ const Producto = require('./modules/productos/producto.model');
 
 app.get('/api/catalogo', async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, categoria } = req.query;
+    const { page = 1, limit = 20, categoria, q } = req.query;
     const pageNum = Math.max(1, Number(page));
     const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
     const filtro = { disponible: true };
     if (categoria) filtro.categoria = String(categoria).toLowerCase();
+    if (q) {
+      const busqueda = String(q).trim();
+      if (busqueda) {
+        filtro.$or = [
+          { nombre: { $regex: busqueda, $options: 'i' } },
+          { sku: { $regex: busqueda, $options: 'i' } },
+        ];
+      }
+    }
     const [total, data] = await Promise.all([
       Producto.countDocuments(filtro),
       Producto.find(filtro).sort({ createdAt: -1 }).skip((pageNum - 1) * limitNum).limit(limitNum),

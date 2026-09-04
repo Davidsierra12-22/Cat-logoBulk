@@ -11,13 +11,16 @@ const productos = ref([]);
 const cargando = ref(false);
 const pagina = ref(1);
 const totalPaginas = ref(1);
+const busqueda = ref("");
 const filtroCategoria = ref("");
+const categorias = ref([]);
 
 const cargar = async () => {
   cargando.value = true;
   try {
     let url = `/catalogo?page=${pagina.value}&limit=12`;
-    if (filtroCategoria.value) url += `&categoria=${filtroCategoria.value}`;
+    if (busqueda.value.trim()) url += `&q=${encodeURIComponent(busqueda.value.trim())}`;
+    if (filtroCategoria.value) url += `&categoria=${encodeURIComponent(filtroCategoria.value)}`;
     const respuesta = await get(url);
     productos.value = respuesta.data;
     totalPaginas.value = Math.ceil(respuesta.total / 12) || 1;
@@ -28,7 +31,25 @@ const cargar = async () => {
   }
 };
 
-onMounted(cargar);
+const aplicarFiltro = () => {
+  pagina.value = 1;
+  cargar();
+};
+
+const limpiarFiltros = () => {
+  busqueda.value = "";
+  filtroCategoria.value = "";
+  aplicarFiltro();
+};
+
+onMounted(async () => {
+  try {
+    categorias.value = await get("/categorias/public");
+  } catch (e) {
+    console.error(e);
+  }
+  cargar();
+});
 </script>
 
 <template>
@@ -51,20 +72,43 @@ onMounted(cargar);
           </div>
         </div>
 
-        <div class="row q-col-gutter-sm q-mb-lg" style="max-width:500px;margin:0 auto">
-          <div class="col-12">
+        <div class="row q-col-gutter-sm q-mb-lg" style="max-width:640px;margin:0 auto">
+          <div class="col-12 col-sm-7">
             <q-input
-              v-model="filtroCategoria"
+              v-model="busqueda"
               outlined dense
-              label="Buscar por categoria"
+              label="Buscar producto por nombre o SKU"
               clearable
-              @clear="filtroCategoria = ''; pagina = 1; cargar()"
-              @keyup.enter="pagina = 1; cargar()"
+              @clear="aplicarFiltro()"
+              @keyup.enter="aplicarFiltro()"
             >
               <template #append>
-                <q-btn flat dense icon="search" @click="pagina = 1; cargar()" />
+                <q-btn flat dense icon="search" @click="aplicarFiltro()" />
               </template>
             </q-input>
+          </div>
+          <div class="col-12 col-sm-5">
+            <q-select
+              v-model="filtroCategoria"
+              :options="categorias.map((c) => ({ label: c.nombre, value: c.slug }))"
+              option-label="label"
+              option-value="value"
+              outlined dense
+              label="Categoria"
+              clearable
+              emit-value
+              map-options
+              @update:model-value="aplicarFiltro()"
+            />
+          </div>
+          <div class="col-12 text-center q-mt-xs">
+            <q-btn
+              v-if="busqueda || filtroCategoria"
+              flat dense no-caps color="grey-7"
+              icon="filter_alt_off"
+              label="Limpiar filtros"
+              @click="limpiarFiltros()"
+            />
           </div>
         </div>
 
