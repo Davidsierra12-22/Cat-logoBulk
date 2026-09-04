@@ -1,26 +1,41 @@
 const Redis = require('ioredis');
 const env = require('./env');
 
-const redis = new Redis({
-  host: env.REDIS_HOST,
-  port: env.REDIS_PORT,
-  maxRetriesPerRequest: 3,
+const redisHabilitado = Boolean(env.REDIS_URL || env.REDIS_HOST);
+
+const opciones = {
+  maxRetriesPerRequest: 2,
   retryStrategy(times) {
-    if (times > 3) return null;
-    return Math.min(times * 200, 2000);
+    if (times > 2) return null;
+    return Math.min(times * 200, 1500);
   },
   lazyConnect: true,
-});
+};
 
-redis.on('error', (err) => {
-  if (err.code !== 'ECONNREFUSED') {
-    console.error(`[redis] Error de conexión: ${err.message}`);
-  }
-});
+if (env.REDIS_URL) {
+  opciones.host = undefined;
+  opciones.port = undefined;
+  opciones.path = undefined;
+  opciones.options = undefined;
+} else {
+  opciones.host = env.REDIS_HOST;
+  opciones.port = env.REDIS_PORT;
+}
 
-redis.connect().catch(() => {});
+const redis = redisHabilitado ? new Redis(env.REDIS_URL || opciones) : null;
+
+if (redis) {
+  redis.on('error', (err) => {
+    if (err.code !== 'ECONNREFUSED') {
+      console.error(`[redis] Error de conexión: ${err.message}`);
+    }
+  });
+
+  redis.connect().catch(() => {});
+}
 
 async function pingRedis() {
+  if (!redis) return 'down';
   try {
     const respuesta = await redis.ping();
     return respuesta === 'PONG' ? 'up' : 'down';
@@ -29,4 +44,4 @@ async function pingRedis() {
   }
 }
 
-module.exports = { redis, pingRedis };
+module.exports = { redis, pingRedis, redisHabilitado };

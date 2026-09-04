@@ -1,6 +1,7 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
+const env = require('./config/env');
 const { pingRedis } = require('./config/redis');
 const { getMongoStatus } = require('./config/db');
 const errorHandler = require('./middlewares/errorHandler');
@@ -10,7 +11,9 @@ const app = express();
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+  const origen = req.headers.origin;
+  const permitido = origen && env.CORS_ORIGIN.includes(origen) ? origen : env.CORS_ORIGIN[0];
+  res.header('Access-Control-Allow-Origin', permitido);
   res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, x-token');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
@@ -19,7 +22,7 @@ app.use((req, res, next) => {
 
 app.get('/health', async (req, res) => {
   const [mongo, redis] = await Promise.all([getMongoStatus(), pingRedis()]);
-  if (mongo === 'up' && redis === 'up') {
+  if (mongo === 'up') {
     return res.status(200).json({ status: 'ok', mongo, redis });
   }
   return res.status(503).json({ status: 'error', mongo, redis });
