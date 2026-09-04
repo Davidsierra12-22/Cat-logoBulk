@@ -1,14 +1,10 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
 
 import { get } from "@/services/api.service";
-import { useAuthStore } from "@/store/Auth";
 import { useGeneralStore } from "@/store/General";
 import logo from "@/assets/logo.svg";
 
-const router = useRouter();
-const auth = useAuthStore();
 const general = useGeneralStore();
 
 const productos = ref([]);
@@ -33,10 +29,6 @@ const cargar = async () => {
 };
 
 onMounted(cargar);
-
-const irLogin = () => {
-  router.push({ name: "login" });
-};
 </script>
 
 <template>
@@ -47,20 +39,6 @@ const irLogin = () => {
           <img :src="logo" width="32" height="32" class="q-mr-sm" />
           {{ general.titulo }}
         </q-toolbar-title>
-        <q-btn
-          v-if="auth.estaAutenticado"
-          flat dense no-caps label="Admin"
-          icon="admin_panel_settings"
-          color="primary"
-          @click="router.push({ name: 'admin' })"
-        />
-        <q-btn
-          v-else
-          flat dense no-caps label="Iniciar sesion"
-          icon="login"
-          color="primary"
-          @click="irLogin"
-        />
       </q-toolbar>
     </q-header>
 
