@@ -174,7 +174,7 @@ const cambiarPagina = (nuevaPagina) => {
 
         <template #body-cell-activo="celda">
           <q-td :props="celda" class="text-center">
-            <q-badge :color="celda.row.activo ? 'positive' : 'grey-6'" :label="celda.row.activo ? 'Activo' : 'Inactivo'" />
+            <q-badge :color="celda.row.activo ? 'positive' : 'negative'" :label="celda.row.activo ? 'Activo' : 'Inactivo'" />
           </q-td>
         </template>
 
@@ -183,7 +183,7 @@ const cambiarPagina = (nuevaPagina) => {
             <q-btn flat dense round size="sm" icon="edit" color="primary" class="action-secondary" @click="abrirEdicion(celda.row)">
               <q-tooltip>Editar</q-tooltip>
             </q-btn>
-            <q-btn flat dense round size="sm" :icon="celda.row.activo ? 'toggle_on' : 'toggle_off'" :color="celda.row.activo ? 'negative' : 'positive'" class="action-secondary" @click="toggleActivo(celda.row)">
+            <q-btn flat dense round size="sm" :icon="celda.row.activo ? 'toggle_on' : 'toggle_off'" :color="celda.row.activo ? 'positive' : 'negative'" class="action-secondary" @click="toggleActivo(celda.row)">
               <q-tooltip>{{ celda.row.activo ? "Desactivar" : "Activar" }}</q-tooltip>
             </q-btn>
           </q-td>
