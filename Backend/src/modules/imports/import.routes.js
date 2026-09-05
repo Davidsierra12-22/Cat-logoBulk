@@ -2,13 +2,16 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const importController = require('./import.controller');
 const auth = require('../../middlewares/auth');
 const rol = require('../../middlewares/rol');
 
 const router = express.Router();
 
-const uploadsDir = path.resolve(__dirname, '../../../uploads');
+// Carpeta temporal: en serverless (Vercel) solo se puede escribir en el FS
+// efimero, y para desarrollo local /tmp tambien sirve.
+const uploadsDir = path.join(os.tmpdir(), 'catalogo-uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({
