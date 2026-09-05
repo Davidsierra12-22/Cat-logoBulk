@@ -51,7 +51,7 @@ app.get('/api/catalogo', async (req, res, next) => {
     const { page = 1, limit = 20, categoria, q } = req.query;
     const pageNum = Math.max(1, Number(page));
     const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
-    const filtro = { disponible: true };
+    const filtro = { disponible: true, activo: { $ne: false } };
     if (categoria) filtro.categoria = String(categoria).toLowerCase();
     if (q) {
       const busqueda = String(q).trim();

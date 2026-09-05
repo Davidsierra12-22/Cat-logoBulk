@@ -17,6 +17,7 @@ const router = express.Router();
  *       - { in: query, name: categoria, schema: { type: string }, description: filtro por categoría }
  *       - { in: query, name: proveedor, schema: { type: string }, description: slug o id de proveedor }
  *       - { in: query, name: disponible, schema: { type: boolean }, description: true/false }
+ *       - { in: query, name: activo, schema: { type: boolean }, description: 'true/false: producto desactivado (borrado logico)' }
  *     responses:
  *       200: { description: 'Lista paginada: data, page, limit y total' }
  *       401: { description: No autenticado }
@@ -87,11 +88,11 @@ router.post('/', auth, rol('admin'), productoController.crear);
  *       409: { description: Sku duplicado }
  *   delete:
  *     tags: [Productos]
- *     summary: Eliminar producto (solo admin)
+ *     summary: 'Desactivar producto (borrado logico, solo admin) - activo = false'
  *     parameters:
  *       - { in: path, name: id, required: true, schema: { type: string } }
  *     responses:
- *       204: { description: Eliminado (sin body) }
+ *       204: { description: Desactivado (sin body) }
  *       403: { description: Sin permisos de admin }
  *       404: { description: Producto no encontrado }
  */

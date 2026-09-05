@@ -2,8 +2,8 @@ const usuarioService = require('./usuario.service');
 
 async function listar(req, res, next) {
   try {
-    const { page, limit, rol, busqueda } = req.query;
-    const resultado = await usuarioService.listar({ page, limit, rol, busqueda });
+    const { page, limit, rol, busqueda, activo } = req.query;
+    const resultado = await usuarioService.listar({ page, limit, rol, busqueda, activo });
     return res.status(200).json(resultado);
   } catch (err) {
     return next(err);
@@ -21,7 +21,7 @@ async function obtener(req, res, next) {
 
 async function actualizar(req, res, next) {
   try {
-    const usuario = await usuarioService.actualizar(req.params.id, req.body);
+    const usuario = await usuarioService.actualizar(req.params.id, req.body, req.usuario.id);
     return res.status(200).json(usuario);
   } catch (err) {
     return next(err);

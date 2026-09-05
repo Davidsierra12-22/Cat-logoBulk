@@ -31,6 +31,7 @@ function normalizarProducto(fila, proveedorId) {
     precio: Math.round(Number(fila.precio) * 100) / 100,
     stock: Math.trunc(Number(fila.stock)),
     disponible: Math.trunc(Number(fila.stock)) > 0,
+    activo: true,
     categoria: String(fila.categoria || 'sin-categoria').trim().toLowerCase(),
     proveedorId,
     descripcion: fila.descripcion ? String(fila.descripcion).trim() : null,

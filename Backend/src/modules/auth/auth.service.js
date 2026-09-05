@@ -29,6 +29,10 @@ async function loguear({ email, password }) {
     throw new AppError(401, 'Credenciales inválidas', 'CREDENCIALES_INVALIDAS');
   }
 
+  if (usuario.activo === false) {
+    throw new AppError(403, 'Usuario desactivado. Contacta al administrador', 'USUARIO_INACTIVO');
+  }
+
   const token = jwt.sign(
     { sub: usuario._id.toString(), rol: usuario.rol.toLowerCase() },
     env.JWT_SECRET,

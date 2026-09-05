@@ -32,6 +32,9 @@ function normalizarProducto(datos) {
   if (datos.proveedorId !== undefined) {
     limpio.proveedorId = datos.proveedorId;
   }
+  if (datos.activo !== undefined) {
+    limpio.activo = datos.activo === true || datos.activo === 'true';
+  }
 
   return limpio;
 }
@@ -49,13 +52,16 @@ async function resolverProveedor(proveedor) {
   return proveedorDoc._id;
 }
 
-async function listarProductos({ page, limit, categoria, proveedor, disponible }) {
+async function listarProductos({ page, limit, categoria, proveedor, disponible, activo }) {
   const pageNum = Math.max(1, Number(page) || 1);
   const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
 
   const filtro = {};
   if (categoria) filtro.categoria = String(categoria).toLowerCase();
   if (disponible !== undefined) filtro.disponible = disponible === 'true';
+  if (activo !== undefined) {
+    filtro.activo = activo === 'true' ? { $ne: false } : false;
+  }
   if (proveedor) filtro.proveedorId = await resolverProveedor(proveedor);
 
   return productoRepository.listar({ page: pageNum, limit: limitNum, filtro });
@@ -100,10 +106,11 @@ async function actualizarProducto(id, datos) {
 }
 
 async function eliminarProducto(id) {
-  const eliminado = await productoRepository.eliminar(id);
-  if (!eliminado) {
+  const desactivado = await productoRepository.desactivar(id);
+  if (!desactivado) {
     throw new AppError(404, 'Producto no encontrado', 'PRODUCTO_NO_ENCONTRADO');
   }
+  return desactivado;
 }
 
 module.exports = {

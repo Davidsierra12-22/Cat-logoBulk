@@ -1,6 +1,5 @@
 const AppError = require('../../errors/AppError');
 const proveedorRepository = require('./proveedor.repository');
-const productoRepository = require('../productos/producto.repository');
 
 function generarSlug(nombre) {
   return String(nombre).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -39,17 +38,7 @@ async function actualizarProveedor(id, datos) {
 
 async function eliminarProveedor(id) {
   await buscarProveedor(id);
-
-  const conProductos = (await productoRepository.contarPorProveedor(id)) > 0;
-  if (conProductos) {
-    throw new AppError(
-      409,
-      'No se puede eliminar: el proveedor tiene productos asociados. Desactívalo con activo: false',
-      'PROVEEDOR_CON_PRODUCTOS'
-    );
-  }
-
-  await proveedorRepository.eliminar(id);
+  return proveedorRepository.actualizar(id, { activo: false });
 }
 
 module.exports = {

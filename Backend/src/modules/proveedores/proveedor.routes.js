@@ -74,14 +74,13 @@ router.post('/', auth, rol('admin'), proveedorController.crear);
  *       404: { description: Proveedor no encontrado }
  *   delete:
  *     tags: [Proveedores]
- *     summary: Eliminar proveedor (solo admin) - 409 si tiene productos
+ *     summary: 'Desactivar proveedor (borrado logico, solo admin) - activo = false'
  *     parameters:
  *       - { in: path, name: id, required: true, schema: { type: string } }
  *     responses:
- *       204: { description: Eliminado (sin body) }
+ *       204: { description: Desactivado (sin body) }
  *       403: { description: Sin permisos de admin }
  *       404: { description: Proveedor no encontrado }
- *       409: { description: Tiene productos asociados }
  */
 router.get('/:id', auth, proveedorController.obtener);
 router.put('/:id', auth, rol('admin'), proveedorController.actualizar);

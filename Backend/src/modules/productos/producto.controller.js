@@ -2,13 +2,14 @@ const productoService = require('./producto.service');
 
 async function listar(req, res, next) {
   try {
-    const { page, limit, categoria, proveedor, disponible } = req.query;
+    const { page, limit, categoria, proveedor, disponible, activo } = req.query;
     const resultado = await productoService.listarProductos({
       page,
       limit,
       categoria,
       proveedor,
       disponible,
+      activo,
     });
     return res.status(200).json(resultado);
   } catch (err) {

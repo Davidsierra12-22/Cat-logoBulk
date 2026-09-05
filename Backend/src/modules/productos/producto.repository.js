@@ -28,8 +28,8 @@ async function actualizar(id, datos) {
   return Producto.findByIdAndUpdate(id, aActualizar, { returnDocument: 'after', runValidators: true });
 }
 
-async function eliminar(id) {
-  return Producto.findByIdAndDelete(id);
+async function desactivar(id) {
+  return Producto.findByIdAndUpdate(id, { activo: false }, { returnDocument: 'after' });
 }
 
 async function contarPorProveedor(proveedorId) {
@@ -42,6 +42,6 @@ module.exports = {
   buscarPorSku,
   crear,
   actualizar,
-  eliminar,
+  desactivar,
   contarPorProveedor,
 };

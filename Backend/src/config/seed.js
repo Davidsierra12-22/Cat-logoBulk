@@ -1,4 +1,5 @@
 const Categoria = require('../modules/categorias/categoria.model');
+const Producto = require('../modules/productos/producto.model');
 
 const CATEGORIAS_POR_DEFECTO = [
   'perifericos',
@@ -34,4 +35,23 @@ async function asegurarCategorias() {
   }
 }
 
-module.exports = { asegurarCategorias };
+/**
+ * Migracion de datos legacy: los productos creados antes del borrado logico
+ * no tienen la bandera `activo`. Los normaliza a activo=true para que nada
+ * desaparezca del catalogo por un dato faltante.
+ */
+async function asegurarActivoProductos() {
+  try {
+    const resultado = await Producto.updateMany(
+      { activo: { $exists: false } },
+      { $set: { activo: true } }
+    );
+    if (resultado.modifiedCount > 0) {
+      console.log(`[seed] Migracion: ${resultado.modifiedCount} productos marcados como activo.`);
+    }
+  } catch (err) {
+    console.warn(`[seed] No se pudo migrar productos: ${err.message}`);
+  }
+}
+
+module.exports = { asegurarCategorias, asegurarActivoProductos };

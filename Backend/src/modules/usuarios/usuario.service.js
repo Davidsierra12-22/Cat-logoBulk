@@ -4,12 +4,13 @@ const Usuario = require('../auth/usuario.model');
 
 const SALT_ROUNDS = 10;
 
-async function listar({ page, limit, rol, busqueda }) {
+async function listar({ page, limit, rol, busqueda, activo }) {
   const pageNum = Math.max(1, Number(page) || 1);
   const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
 
   const filtro = {};
   if (rol) filtro.rol = rol;
+  if (activo !== undefined) filtro.activo = activo === 'true';
   if (busqueda) {
     filtro.email = { $regex: String(busqueda).trim(), $options: 'i' };
   }
@@ -30,10 +31,25 @@ async function buscarPorId(id) {
   return usuario;
 }
 
-async function actualizar(id, datos) {
+async function actualizar(id, datos, usuarioActualId) {
   await buscarPorId(id);
 
   const aActualizar = {};
+  if (datos.activo !== undefined) {
+    aActualizar.activo = datos.activo === true || datos.activo === 'true';
+    if (aActualizar.activo === false) {
+      if (String(id) === String(usuarioActualId)) {
+        throw new AppError(400, 'No puedes desactivar tu propia cuenta', 'NO_DESACTIVAR_MISMO');
+      }
+      const objetivo = await Usuario.findById(id);
+      if (objetivo.rol === 'admin') {
+        const adminsActivos = await Usuario.countDocuments({ rol: 'admin', activo: true });
+        if (adminsActivos <= 1) {
+          throw new AppError(400, 'No se puede desactivar al ultimo admin activo', 'ULTIMO_ADMIN_ACTIVO');
+        }
+      }
+    }
+  }
   if (datos.email !== undefined) aActualizar.email = String(datos.email).trim().toLowerCase();
   if (datos.rol !== undefined) aActualizar.rol = datos.rol;
   if (datos.password !== undefined) {
@@ -47,10 +63,11 @@ async function actualizar(id, datos) {
 }
 
 async function eliminar(id) {
-  const eliminado = await Usuario.findByIdAndDelete(id);
-  if (!eliminado) {
+  const desactivado = await Usuario.findByIdAndUpdate(id, { activo: false }, { returnDocument: 'after' });
+  if (!desactivado) {
     throw new AppError(404, 'Usuario no encontrado', 'USUARIO_NO_ENCONTRADO');
   }
+  return desactivado;
 }
 
 module.exports = { listar, buscarPorId, actualizar, eliminar };

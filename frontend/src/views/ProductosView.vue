@@ -4,15 +4,13 @@ import { computed, onMounted, ref } from "vue";
 import EncabezadoPagina from "@/components/Encabezados/EncabezadoPagina.vue";
 import TablaDatos from "@/components/Tables/TablaDatos.vue";
 
-import { get, post, put, del } from "@/services/api.service";
+import { get, post, put } from "@/services/api.service";
 import { useGeneralStore } from "@/store/General";
 import { useNotificar } from "@/composables/useNotificar";
-import { useConfirmar } from "@/composables/useConfirmar";
 import { requerido, minimo, enteroMayorA } from "@/utils/reglas";
 
 const general = useGeneralStore();
 const { notificarOk, notificarError } = useNotificar();
-const { confirmar } = useConfirmar();
 
 const columnas = [
   { name: "sku", label: "SKU", field: "sku", align: "left", sortable: true },
@@ -20,7 +18,8 @@ const columnas = [
   { name: "precio", label: "Precio", field: "precio", align: "right", sortable: true, format: (v) => `$${Number(v).toFixed(2)}` },
   { name: "stock", label: "Stock", field: "stock", align: "right", sortable: true },
   { name: "categoria", label: "Categoria", field: "categoria", align: "left", sortable: true },
-  { name: "disponible", label: "Estado", field: "disponible", align: "center", sortable: true },
+  { name: "disponible", label: "Stock disponible", field: "disponible", align: "center", sortable: true },
+  { name: "activo", label: "Estado", field: "activo", align: "center", sortable: true },
   { name: "acciones", label: "Acciones", field: "acciones", align: "right" },
 ];
 
@@ -34,6 +33,7 @@ const limite = 20;
 
 const filtroCategoria = ref("");
 const filtroDisponible = ref("");
+const filtroActivo = ref("");
 
 const cargar = async () => {
   cargando.value = true;
@@ -42,6 +42,7 @@ const cargar = async () => {
     let url = `/productos?page=${pagina.value}&limit=${limite}`;
     if (filtroCategoria.value) url += `&categoria=${filtroCategoria.value}`;
     if (filtroDisponible.value) url += `&disponible=${filtroDisponible.value}`;
+    if (filtroActivo.value) url += `&activo=${filtroActivo.value}`;
     const respuesta = await get(url);
     productos.value = respuesta.data;
     totalPaginas.value = Math.ceil(respuesta.total / limite) || 1;
@@ -112,17 +113,10 @@ const guardar = async () => {
   }
 };
 
-const eliminar = async (producto) => {
-  const aceptado = await confirmar({
-    titulo: "Eliminar producto",
-    mensaje: `¿Eliminar el producto ${producto.sku}?`,
-    textoOk: "Eliminar",
-    color: "negative",
-  });
-  if (!aceptado) return;
+const toggleActivo = async (producto) => {
   try {
-    await del(`/productos/${producto._id}`);
-    notificarOk("Producto eliminado");
+    await put(`/productos/${producto._id}`, { activo: !producto.activo });
+    notificarOk(producto.activo ? "Producto desactivado" : "Producto activado");
     await cargar();
   } catch (e) {
     notificarError(e);
@@ -161,7 +155,10 @@ const cambiarPagina = (nuevaPagina) => {
           </q-input>
         </div>
         <div class="col-12 col-md-3">
-          <q-select v-model="filtroDisponible" outlined dense label="Disponible" :options="[{ label: 'Si', value: 'true' }, { label: 'No', value: 'false' }]" emit-value map-options clearable @update:model-value="pagina = 1; cargar()" />
+          <q-select v-model="filtroDisponible" outlined dense label="Stock" :options="[{ label: 'Con stock', value: 'true' }, { label: 'Sin stock', value: 'false' }]" emit-value map-options clearable @update:model-value="pagina = 1; cargar()" />
+        </div>
+        <div class="col-12 col-md-3">
+          <q-select v-model="filtroActivo" outlined dense label="Estado" :options="[{ label: 'Activo', value: 'true' }, { label: 'Inactivo', value: 'false' }]" emit-value map-options clearable @update:model-value="pagina = 1; cargar()" />
         </div>
         <div class="col-12 col-md-3 flex items-center">
           <span class="text-caption text-grey-7">{{ totalItems }} productos</span>
@@ -171,7 +168,13 @@ const cambiarPagina = (nuevaPagina) => {
       <TablaDatos :filas="productos" :columnas="columnas" :cargando="cargando" mensaje-vacio="Aun no hay productos">
         <template #body-cell-disponible="celda">
           <q-td :props="celda" class="text-center">
-            <q-badge :color="celda.row.disponible ? 'positive' : 'grey-6'" :label="celda.row.disponible ? 'Activo' : 'Sin stock'" />
+            <q-badge :color="celda.row.disponible ? 'positive' : 'orange-8'" :label="celda.row.disponible ? 'Con stock' : 'Sin stock'" />
+          </q-td>
+        </template>
+
+        <template #body-cell-activo="celda">
+          <q-td :props="celda" class="text-center">
+            <q-badge :color="celda.row.activo ? 'positive' : 'grey-6'" :label="celda.row.activo ? 'Activo' : 'Inactivo'" />
           </q-td>
         </template>
 
@@ -180,8 +183,8 @@ const cambiarPagina = (nuevaPagina) => {
             <q-btn flat dense round size="sm" icon="edit" color="primary" class="action-secondary" @click="abrirEdicion(celda.row)">
               <q-tooltip>Editar</q-tooltip>
             </q-btn>
-            <q-btn flat dense round size="sm" icon="delete" color="negative" class="action-secondary" @click="eliminar(celda.row)">
-              <q-tooltip>Eliminar</q-tooltip>
+            <q-btn flat dense round size="sm" :icon="celda.row.activo ? 'toggle_on' : 'toggle_off'" :color="celda.row.activo ? 'negative' : 'positive'" class="action-secondary" @click="toggleActivo(celda.row)">
+              <q-tooltip>{{ celda.row.activo ? "Desactivar" : "Activar" }}</q-tooltip>
             </q-btn>
           </q-td>
         </template>

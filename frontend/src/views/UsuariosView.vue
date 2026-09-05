@@ -4,19 +4,18 @@ import { computed, onMounted, ref } from "vue";
 import EncabezadoPagina from "@/components/Encabezados/EncabezadoPagina.vue";
 import TablaDatos from "@/components/Tables/TablaDatos.vue";
 
-import { get, put, del } from "@/services/api.service";
+import { get, put } from "@/services/api.service";
 import { useGeneralStore } from "@/store/General";
 import { useNotificar } from "@/composables/useNotificar";
-import { useConfirmar } from "@/composables/useConfirmar";
 import { requerido, esEmail, minimo } from "@/utils/reglas";
 
 const general = useGeneralStore();
 const { notificarOk, notificarError } = useNotificar();
-const { confirmar } = useConfirmar();
 
 const columnas = [
   { name: "email", label: "Email", field: "email", align: "left", sortable: true },
   { name: "rol", label: "Rol", field: "rol", align: "center", sortable: true },
+  { name: "activo", label: "Estado", field: "activo", align: "center", sortable: true },
   { name: "createdAt", label: "Creado", field: "createdAt", align: "left", sortable: true, format: (v) => new Date(v).toLocaleDateString() },
   { name: "acciones", label: "Acciones", field: "acciones", align: "right" },
 ];
@@ -29,6 +28,7 @@ const totalPaginas = ref(1);
 const totalItems = ref(0);
 const limite = 20;
 const filtroRol = ref("");
+const filtroActivo = ref("");
 const busqueda = ref("");
 
 const cargar = async () => {
@@ -37,6 +37,7 @@ const cargar = async () => {
   try {
     let url = `/usuarios?page=${pagina.value}&limit=${limite}`;
     if (filtroRol.value) url += `&rol=${filtroRol.value}`;
+    if (filtroActivo.value) url += `&activo=${filtroActivo.value}`;
     if (busqueda.value) url += `&busqueda=${encodeURIComponent(busqueda.value)}`;
     const respuesta = await get(url);
     usuarios.value = respuesta.data;
@@ -82,17 +83,11 @@ const guardar = async () => {
   }
 };
 
-const eliminar = async (usuario) => {
-  const aceptado = await confirmar({
-    titulo: "Eliminar usuario",
-    mensaje: `¿Eliminar ${usuario.email}?`,
-    textoOk: "Eliminar",
-    color: "negative",
-  });
-  if (!aceptado) return;
+const toggleActivo = async (usuario) => {
   try {
-    await del(`/usuarios/${usuario._id}`);
-    notificarOk("Usuario eliminado");
+    const objetivo = usuario.activo ? "desactivar" : "activar";
+    await put(`/usuarios/${usuario._id}`, { activo: !usuario.activo });
+    notificarOk(`Usuario ${objetivo}`);
     await cargar();
   } catch (e) {
     notificarError(e);
@@ -144,7 +139,18 @@ const cambiarPagina = (nuevaPagina) => {
             @update:model-value="pagina = 1; cargar()"
           />
         </div>
-        <div class="col-12 col-md-3 flex items-center">
+        <div class="col-12 col-md-3">
+          <q-select
+            v-model="filtroActivo"
+            outlined dense
+            label="Estado"
+            :options="[{ label: 'Activo', value: 'true' }, { label: 'Inactivo', value: 'false' }]"
+            emit-value map-options
+            clearable
+            @update:model-value="pagina = 1; cargar()"
+          />
+        </div>
+        <div class="col-12 col-md-2 flex items-center">
           <span class="text-caption text-grey-7">{{ totalItems }} usuarios</span>
         </div>
       </div>
@@ -156,13 +162,19 @@ const cambiarPagina = (nuevaPagina) => {
           </q-td>
         </template>
 
+        <template #body-cell-activo="celda">
+          <q-td :props="celda" class="text-center">
+            <q-badge :color="celda.row.activo ? 'positive' : 'grey-6'" :label="celda.row.activo ? 'Activo' : 'Inactivo'" />
+          </q-td>
+        </template>
+
         <template #body-cell-acciones="celda">
           <q-td :props="celda" class="text-right">
             <q-btn flat dense round size="sm" icon="edit" color="primary" class="action-secondary" @click="abrirEdicion(celda.row)">
               <q-tooltip>Editar</q-tooltip>
             </q-btn>
-            <q-btn flat dense round size="sm" icon="delete" color="negative" class="action-secondary" @click="eliminar(celda.row)">
-              <q-tooltip>Eliminar</q-tooltip>
+            <q-btn flat dense round size="sm" :icon="celda.row.activo ? 'toggle_on' : 'toggle_off'" :color="celda.row.activo ? 'negative' : 'positive'" class="action-secondary" @click="toggleActivo(celda.row)">
+              <q-tooltip>{{ celda.row.activo ? "Desactivar" : "Activar" }}</q-tooltip>
             </q-btn>
           </q-td>
         </template>

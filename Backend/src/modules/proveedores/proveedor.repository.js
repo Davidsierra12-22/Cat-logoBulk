@@ -24,8 +24,4 @@ async function actualizar(id, datos) {
   return Proveedor.findByIdAndUpdate(id, datos, { returnDocument: 'after', runValidators: true });
 }
 
-async function eliminar(id) {
-  return Proveedor.findByIdAndDelete(id);
-}
-
-module.exports = { listar, buscarPorId, buscarPorSlug, crear, actualizar, eliminar };
+module.exports = { listar, buscarPorId, buscarPorSlug, crear, actualizar };
